@@ -7,15 +7,15 @@
 ## 2. Desktop Map Camera
 
 - [x] 2.1 Restructure the metro map scene into a `Node2D` map world with an active `Camera2D`, preserving the current SVG appearance and verifying the map opens from the main menu without scene or rendering errors
-- [ ] 2.2 Add named camera movement actions bound to the keyboard arrow keys and implement frame-rate-independent movement, verifying all four directions work at the supported zoom levels
-- [ ] 2.3 Add uniform mouse-wheel zoom with configured minimum and maximum values, verifying repeated wheel input cannot exceed either limit
-- [ ] 2.4 Calculate the initial camera framing and clamp camera position against the `1280 x 1500` map bounds after movement, zoom, and viewport resize, verifying the map cannot be moved fully outside the viewport and smaller dimensions remain centered
+- [x] 2.2 Add named camera movement actions bound to the keyboard arrow keys and implement frame-rate-independent movement, verifying all four directions work at the supported zoom levels
+- [x] 2.3 Add uniform mouse-wheel zoom with configured minimum and maximum values, verifying repeated wheel input cannot exceed either limit
+- [x] 2.4 Calculate the initial camera framing and clamp camera position against the `1280 x 1500` map bounds after movement, zoom, and viewport resize, verifying the map cannot be moved fully outside the viewport and smaller dimensions remain centered
 
 ## 3. Circle Line Source Data
 
-- [ ] 3.1 Cross-reference the SVG, existing station research, and a current authoritative metro source to establish the 12 Circle Line station IDs, order, transfer destinations, intersecting lines, display names, colors, and map coordinates; verify every selected station visually against the SVG
-- [ ] 3.2 Add the runtime `LINES` dictionary for the Circle Line and all directly intersecting lines, and verify every line has a stable ID, Russian display name, color, and correct playable flag
-- [ ] 3.3 Add the runtime `STATIONS` dictionary for all Circle Line nodes and their direct line-specific transfer destinations, and verify every station references a defined line and uses an SVG-aligned position
+- [x] 3.1 Cross-reference the SVG, existing station research, and a current authoritative metro source to establish the 12 Circle Line station IDs, order, transfer destinations, intersecting lines, display names, colors, and map coordinates; verify every selected station visually against the SVG
+- [x] 3.2 Add the runtime `LINES` dictionary for the Circle Line and all directly intersecting lines, and verify every line has a stable ID, Russian display name, color, and correct playable flag
+- [x] 3.3 Add the runtime `STATIONS` dictionary for all Circle Line nodes and their direct line-specific transfer destinations, and verify every station references a defined line and uses an SVG-aligned position
 - [ ] 3.4 Add each bidirectional Circle Line and transfer connection exactly once with cost `1` for neighboring Circle Line stations and cost `0` for transfers, and verify no paid connection extends along a non-playable branch
 
 ## 4. Graph Access and Validation
