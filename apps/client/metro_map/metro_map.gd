@@ -15,6 +15,7 @@ const STATION_LABELS := [
 
 
 func _ready() -> void:
+	RenderingServer.set_default_clear_color(BACKGROUND_COLOR)
 	get_viewport().size_changed.connect(_on_viewport_size_changed)
 	fill_viewport()
 
@@ -36,6 +37,8 @@ func fill_viewport() -> void:
 
 	camera.position = map_size * 0.5
 	camera.zoom = Vector2.ONE * fill_zoom
+	initial_zoom = fill_zoom
+	clamp_camera_position()
 
 
 func _on_viewport_size_changed() -> void:
@@ -50,7 +53,33 @@ func _process(delta: float) -> void:
 		"camera_up",
 		"camera_down",
 	)
-	camera.position += direction * camera_move_speed * delta
+	camera.position += direction * camera_move_speed * delta / camera.zoom.x
+	clamp_camera_position()
+
+
+func clamp_camera_position() -> void:
+	var map_size := MAP_TEXTURE.get_size()
+	var visible_size := get_viewport_rect().size / camera.zoom
+	var half_visible_size := visible_size * 0.5
+	var map_center := map_size * 0.5
+
+	if visible_size.x >= map_size.x:
+		camera.position.x = map_center.x
+	else:
+		camera.position.x = clampf(
+			camera.position.x,
+			half_visible_size.x,
+			map_size.x - half_visible_size.x,
+		)
+
+	if visible_size.y >= map_size.y:
+		camera.position.y = map_center.y
+	else:
+		camera.position.y = clampf(
+			camera.position.y,
+			half_visible_size.y,
+			map_size.y - half_visible_size.y,
+		)
 
 
 func _draw() -> void:
@@ -95,3 +124,4 @@ func change_zoom(direction: float) -> void:
 	)
 
 	camera.zoom = Vector2.ONE * new_zoom
+	clamp_camera_position()
