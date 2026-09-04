@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://c3m6qebthe7f"]
+
+[ext_resource type="Script" uid="uid://uty4ah1wy2j7" path="res://apps/client/metro_map/metro_map.gd" id="1"]
+
+[node name="MetroMap" type="Node2D" unique_id=1610714227]
+
+[node name="MapWorld" type="Node2D" parent="." unique_id=1359101903]
+script = ExtResource("1")
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=842528626]
