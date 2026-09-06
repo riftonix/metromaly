@@ -14,19 +14,19 @@
 ## 3. Circle Line Source Data
 
 - [x] 3.1 Cross-reference the SVG, existing station research, and a current authoritative metro source to establish the 12 Circle Line station IDs, order, transfer destinations, intersecting lines, display names, colors, and map coordinates; verify every selected station visually against the SVG
-- [x] 3.2 Add the runtime `LINES` dictionary for the Circle Line and all directly intersecting lines, and verify every line has a stable ID, Russian display name, color, and correct playable flag
+- [x] 3.2 Add the runtime `LINES` dictionary for the Circle Line and all directly intersecting lines, and verify every line has a stable ID, English display name, color, and correct playable flag
 - [x] 3.3 Add the runtime `STATIONS` dictionary for all Circle Line nodes and their direct line-specific transfer destinations, and verify every station references a defined line and uses an SVG-aligned position
-- [ ] 3.4 Add each bidirectional Circle Line and transfer connection exactly once with cost `1` for neighboring Circle Line stations and cost `0` for transfers, and verify no paid connection extends along a non-playable branch
+- [x] 3.4 Add each unordered station pair exactly once as `{stations, cost}`, using cost `1` for neighboring Circle Line stations and cost `0` for transfers, and verify no connection extends along a non-playable branch
 
 ## 4. Graph Access and Validation
 
-- [ ] 4.1 Implement undirected direct-connection lookup and verify both endpoint orders return the same cost while unrelated stations return no connection
-- [ ] 4.2 Implement structural validation for record shape, line and station references, self-connections, allowed costs, duplicate undirected pairs, and transfer line membership; verify each invalid fixture produces an actionable diagnostic
-- [ ] 4.3 Implement Circle Line topology validation for station count, paid degree, connectivity, and closure; verify missing, extra, and disconnected paid-edge fixtures fail
-- [ ] 4.4 Add a headless console validation entry point that evaluates the committed dataset, prints concise diagnostics, and verify it exits with code `0` for valid data and non-zero for an invalid fixture
+- [x] 4.1 Implement undirected direct-connection lookup and verify both endpoint orders return the same cost while unrelated stations return no connection
+- [x] 4.2 Implement structural validation for `{stations, cost}` record shape, line and station references, self-connections, costs restricted to `0` or `1`, duplicate unordered pairs, and transfer line membership; verify each invalid fixture produces an actionable diagnostic
+- [x] 4.3 Implement Circle Line topology validation for station count, paid degree, connectivity, and closure; verify missing, extra, and disconnected paid-edge fixtures fail
+- [x] 4.4 Add a headless console validation entry point that evaluates the committed dataset, prints concise diagnostics, and verify it exits with code `0` for valid data and non-zero for an invalid fixture
 
 ## 5. Automated Tests and Documentation
 
-- [ ] 5.1 Add a lightweight Godot test harness or self-contained test runner for graph lookup and validation, and verify focused tests cover valid data, reverse lookup, missing references, duplicate reverse edges, invalid costs, invalid transfers, and broken Circle Line topology
-- [ ] 5.2 Run the focused console tests and committed-data validator through `godot`, recording the exact successful commands and concise results
-- [ ] 5.3 Update runtime data and architecture documentation to describe the `Camera2D` scene boundary and the line, station, and single-declaration connection contracts, and verify it does not claim that mouse dragging, touch input, intersecting branches, or movement gameplay are implemented
+- [x] 5.1 Add a lightweight Godot test harness or self-contained test runner for graph lookup and validation, and verify focused tests cover valid data, reverse lookup, missing references, duplicate reversed pairs, invalid costs, invalid transfers, and broken Circle Line topology
+- [x] 5.2 Run the focused console tests and committed-data validator through `godot`, recording the exact successful commands and concise results
+- [x] 5.3 Update runtime data and architecture documentation to describe the `Camera2D` scene boundary and the line, station, and single-declaration connection contracts, and verify it does not claim that mouse dragging, touch input, intersecting branches, or movement gameplay are implemented

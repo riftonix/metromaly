@@ -1,11 +1,13 @@
+# Metro Map Data Specification
+
 ## Purpose
 
 Provide an authoritative, validated runtime graph for the Moscow Metro Circle Line and its direct transfers so gameplay can query stations and movement costs without interpreting map artwork.
 
-## ADDED Requirements
+## Requirements
 
 ### Requirement: Line catalog
-The network data SHALL define the Circle Line and every metro line that has a direct interchange with a Circle Line station. Each line SHALL have a stable identifier, display name, display color, and a flag indicating whether travel along that line is playable in the current graph.
+The metro map data SHALL define the Circle Line and every metro line that has a direct interchange with a Circle Line station. Each line SHALL have a stable identifier, display name, display color, and a flag indicating whether travel along that line is playable in the current graph.
 
 #### Scenario: Consumer lists intersecting lines
 - **WHEN** a consumer reads the line catalog
@@ -16,7 +18,7 @@ The network data SHALL define the Circle Line and every metro line that has a di
 - **THEN** the Circle Line is marked playable and intersecting lines without modeled branch travel are marked non-playable
 
 ### Requirement: Station catalog
-The network data SHALL define all 12 Circle Line stations and each directly connected transfer station on an intersecting line. Each station SHALL have a stable identifier, Russian display name, line identifier, and map position aligned with the existing SVG coordinate system.
+The metro map data SHALL define all 12 Circle Line stations and each directly connected transfer station on an intersecting line. Each station SHALL have a stable identifier, English display name, line identifier, and map position aligned with the existing SVG coordinate system.
 
 #### Scenario: Consumer reads a Circle Line station
 - **WHEN** a consumer requests a known Circle Line station by its identifier
@@ -27,7 +29,7 @@ The network data SHALL define all 12 Circle Line stations and each directly conn
 - **THEN** the station catalog contains the corresponding line-specific destination referenced by the transfer connection
 
 ### Requirement: Bidirectional connection catalog
-The network data SHALL represent each undirected connection once as two station identifiers and a non-negative integer movement cost. A consumer SHALL be able to traverse a connection in either direction without a reverse declaration.
+The metro map data SHALL represent each unordered station pair once as a record containing a `stations` array of exactly two station identifiers and a `cost` of `0` or `1`. Each connection SHALL be traversable in either direction without a reverse declaration.
 
 #### Scenario: Consumer queries a declared connection forward
 - **WHEN** a consumer queries the cost from the first endpoint to the second endpoint
@@ -60,16 +62,20 @@ The graph SHALL form one closed cycle containing each of the 12 Circle Line stat
 - **WHEN** a consumer queries travel from a transfer destination to the next station on its non-playable line
 - **THEN** the graph reports that no direct move is available
 
-### Requirement: Network data validation
-The project SHALL provide an automated console validation that fails when a line or station reference is missing, a station connects to itself, a movement cost is not zero or one, an undirected connection is duplicated, a station references an unknown line, a transfer has a non-zero cost, or the Circle Line does not form the required 12-station cycle.
+### Requirement: Metro map data validation
+The project SHALL provide an automated console validation that fails when a connection record does not contain exactly `stations` and `cost`, `stations` does not contain exactly two station identifiers, a line or station reference is missing, a station connects to itself, a cost is not `0` or `1`, an unordered station pair is duplicated, a station references an unknown line, a transfer has a non-zero cost, or the Circle Line does not form the required 12-station cycle.
 
-#### Scenario: Valid network data
+#### Scenario: Valid metro map data
 - **WHEN** the validator evaluates the committed Circle Line data
 - **THEN** validation succeeds without errors
 
 #### Scenario: Duplicate reverse connection
 - **WHEN** the data contains both endpoints of an existing connection in reverse order
 - **THEN** validation fails and identifies the duplicate undirected connection
+
+#### Scenario: Invalid connection shape
+- **WHEN** a connection does not contain a two-item `stations` array and one `cost` value
+- **THEN** validation fails and identifies the malformed connection record
 
 #### Scenario: Invalid topology
 - **WHEN** a paid Circle Line connection is missing or references a non-Circle-Line station

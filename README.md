@@ -40,6 +40,12 @@ Server:
 godot --headless --path . apps/server/server_main.tscn
 ```
 
+Verify committed data and run all focused tests:
+
+```bash
+make verify
+```
+
 ## Documentation
 
 Project documentation is organized with the [Diataxis](https://diataxis.fr)

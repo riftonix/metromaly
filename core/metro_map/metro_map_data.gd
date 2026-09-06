@@ -1,4 +1,4 @@
-class_name MetroNetworkData
+class_name MetroMapData
 extends RefCounted
 
 
@@ -195,3 +195,114 @@ const STATIONS := {
 		"position": Vector2(378.5, 619.5),
 	},
 }
+
+const CONNECTIONS := [
+	{
+		"stations": ["park_kultury_koltsevaya", "oktyabrskaya_koltsevaya"],
+		"cost": 1,
+	},
+	{
+		"stations": ["oktyabrskaya_koltsevaya", "dobryninskaya_koltsevaya"],
+		"cost": 1,
+	},
+	{
+		"stations": ["dobryninskaya_koltsevaya", "paveletskaya_koltsevaya"],
+		"cost": 1,
+	},
+	{
+		"stations": ["paveletskaya_koltsevaya", "taganskaya_koltsevaya"],
+		"cost": 1,
+	},
+	{
+		"stations": ["taganskaya_koltsevaya", "kurskaya_koltsevaya"],
+		"cost": 1,
+	},
+	{
+		"stations": ["kurskaya_koltsevaya", "komsomolskaya_koltsevaya"],
+		"cost": 1,
+	},
+	{
+		"stations": ["komsomolskaya_koltsevaya", "prospekt_mira_koltsevaya"],
+		"cost": 1,
+	},
+	{
+		"stations": ["prospekt_mira_koltsevaya", "novoslobodskaya_koltsevaya"],
+		"cost": 1,
+	},
+	{
+		"stations": ["novoslobodskaya_koltsevaya", "belorusskaya_koltsevaya"],
+		"cost": 1,
+	},
+	{
+		"stations": ["belorusskaya_koltsevaya", "krasnopresnenskaya_koltsevaya"],
+		"cost": 1,
+	},
+	{
+		"stations": ["krasnopresnenskaya_koltsevaya", "kievskaya_koltsevaya"],
+		"cost": 1,
+	},
+	{
+		"stations": ["kievskaya_koltsevaya", "park_kultury_koltsevaya"],
+		"cost": 1,
+	},
+	{
+		"stations": ["park_kultury_koltsevaya", "park_kultury_sokolnicheskaya"],
+		"cost": 0,
+	},
+	{
+		"stations": ["oktyabrskaya_koltsevaya", "oktyabrskaya_kaluzhsko_rizhskaya"],
+		"cost": 0,
+	},
+	{
+		"stations": ["dobryninskaya_koltsevaya", "serpukhovskaya_serpukhovsko_timiryazevskaya"],
+		"cost": 0,
+	},
+	{
+		"stations": ["paveletskaya_koltsevaya", "paveletskaya_zamoskvoretskaya"],
+		"cost": 0,
+	},
+	{
+		"stations": ["taganskaya_koltsevaya", "taganskaya_tagansko_krasnopresnenskaya"],
+		"cost": 0,
+	},
+	{
+		"stations": ["taganskaya_koltsevaya", "marksistskaya_kalininskaya"],
+		"cost": 0,
+	},
+	{
+		"stations": ["kurskaya_koltsevaya", "kurskaya_arbatsko_pokrovskaya"],
+		"cost": 0,
+	},
+	{
+		"stations": ["kurskaya_koltsevaya", "chkalovskaya_lyublinsko_dmitrovskaya"],
+		"cost": 0,
+	},
+	{
+		"stations": ["komsomolskaya_koltsevaya", "komsomolskaya_sokolnicheskaya"],
+		"cost": 0,
+	},
+	{
+		"stations": ["prospekt_mira_koltsevaya", "prospekt_mira_kaluzhsko_rizhskaya"],
+		"cost": 0,
+	},
+	{
+		"stations": ["novoslobodskaya_koltsevaya", "mendeleevskaya_serpukhovsko_timiryazevskaya"],
+		"cost": 0,
+	},
+	{
+		"stations": ["belorusskaya_koltsevaya", "belorusskaya_zamoskvoretskaya"],
+		"cost": 0,
+	},
+	{
+		"stations": ["krasnopresnenskaya_koltsevaya", "barrikadnaya_tagansko_krasnopresnenskaya"],
+		"cost": 0,
+	},
+	{
+		"stations": ["kievskaya_koltsevaya", "kievskaya_arbatsko_pokrovskaya"],
+		"cost": 0,
+	},
+	{
+		"stations": ["kievskaya_koltsevaya", "kievskaya_filyovskaya"],
+		"cost": 0,
+	},
+]

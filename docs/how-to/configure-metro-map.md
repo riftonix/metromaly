@@ -16,7 +16,7 @@ const REFERENCE_SIZE := Vector2(1280.0, 1500.0)
 
 ## Change the Background
 
-Change `BACKGROUND_COLOR`. Before drawing the map, the script fills the entire `Control` area with this color.
+Change `BACKGROUND_COLOR`. The map world uses this color behind the SVG, and the viewport clear color extends it beyond the map bounds.
 
 ## Add a Test Label
 
@@ -28,6 +28,6 @@ Add a dictionary containing text and coordinates to `STATION_LABELS`:
 
 Coordinates use the `REFERENCE_SIZE` coordinate system and scale with the map. Labels use the Godot fallback font, size `20`, and `TEXT_COLOR`.
 
-## Preserve Responsive Scaling
+## Preserve Camera Framing
 
-The `_draw()` method selects the smaller scale factor from the window width and height. This preserves the aspect ratio and fits the entire map within the available area. The `resized` signal queues a redraw after the screen dimensions change.
+`fill_viewport()` calculates a uniform initial `Camera2D` zoom from the viewport and map dimensions. `clamp_camera_position()` constrains movement after camera movement, zoom, and viewport resize while centering an axis whose visible area is larger than the map.
