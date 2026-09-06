@@ -10,7 +10,7 @@ The project cannot implement reliable movement rules until the metro map has an 
 - Initialize and constrain the camera so the map starts framed correctly and cannot be moved entirely outside the viewport.
 - Add an expanded line dictionary for the Circle Line and every line that intersects it, including stable identifiers, display names, colors, and playable status.
 - Add runtime station records for all Circle Line stations and every directly connected transfer station on intersecting lines.
-- Add a flat list of bidirectional connections, declared once per pair, with movement costs that distinguish paid travel between neighboring Circle Line stations from free transfers inside station complexes.
+- Add a flat list of unordered station pairs, declared once per pair, with costs that distinguish free transfers from paid Circle Line travel.
 - Add validation that rejects missing references, self-connections, invalid costs, duplicate undirected connections, malformed line assignments, incomplete Circle Line topology, and invalid transfer costs.
 - Add automated validation tests and a console command that can validate the map data independently of the metro map UI.
 
@@ -20,7 +20,7 @@ The project cannot implement reliable movement rules until the metro map has an 
 
 - `godot-cli-environment`: Provide and verify a stable console command for the project's Steam-installed Godot version.
 - `metro-map-camera`: Provide bounded desktop navigation of the metro map through `Camera2D`.
-- `metro-network-data`: Define and validate the playable Circle Line graph, its stations, intersecting lines, and transfer connections.
+- `metro-map-data`: Define and validate the playable Circle Line graph, its stations, intersecting lines, and transfer connections.
 
 ### Modified Capabilities
 

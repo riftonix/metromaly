@@ -33,6 +33,22 @@ Key `metro_map.gd` constants:
 | `MAP_TEXTURE` | `res://apps/client/assets/metro_map/metro_map.svg` | Displayed resource. |
 | `STATION_LABELS` | Two dictionaries | Test labels and their coordinates. |
 
+## Metro Map Data
+
+| Path | Purpose |
+| --- | --- |
+| `core/metro_map/metro_map_data.gd` | Static line, station, and single-declaration connection catalogs. |
+| `core/metro_map/metro_graph.gd` | Undirected direct-connection cost lookup. |
+| `core/metro_map/metro_map_validator.gd` | Structural and Circle Line topology validation. |
+| `core/metro_map/validate_metro_map.gd` | Headless committed-data validation entry point. |
+| `tests/core/metro_map/metro_map_test.gd` | Self-contained lookup and invalid-fixture tests. |
+
+Run all validation and focused tests with:
+
+```bash
+make verify
+```
+
 ## Project Materials
 
 The runtime uses scenes and scripts under `apps/client/` and presentation assets under `apps/client/assets/`.

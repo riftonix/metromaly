@@ -9,15 +9,18 @@ Metromaly is currently an early interface vertical slice.
 - `Start game` and `Exit` actions.
 - Initial focus on the start button for keyboard or controller navigation.
 - Transition from the menu to the metro map screen.
-- Centered SVG map rendering that preserves its aspect ratio.
+- Camera-based SVG map rendering with bounded keyboard movement and mouse-wheel zoom.
 - Two test station labels: `VDNH` and `Alexeevskaya`.
+- Runtime data for the 12 Circle Line station nodes and their direct transfer nodes.
+- Undirected direct-connection lookup and automated structural and topology validation.
+- A single `make verify` command for committed-data validation and focused tests.
 - A minimal headless server entry point.
 
 ## Not Implemented
 
 - Gameplay loop and map interaction.
 - Station selection and state.
-- Loading station data into the executable project.
+- Squad movement, station interaction, and turn handling.
 - Settings, saved games, and game continuation.
 - Returning from the map to the main menu.
 - Final visual design for the menu and map.

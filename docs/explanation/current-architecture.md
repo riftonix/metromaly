@@ -25,25 +25,31 @@ The main menu is responsible only for application entry:
 - Handles input through standard `Button` nodes.
 - Changes the scene or terminates the process.
 
-The map screen is responsible only for presentation:
+The map screen owns presentation and desktop camera navigation:
 
-- Fills the background.
-- Calculates one scale factor from the available width and height.
-- Centers the SVG map.
+- Draws the SVG and test labels in map-space coordinates under `MapWorld`.
+- Uses `Camera2D` for arrow-key movement and mouse-wheel zoom.
+- Frames the map initially and clamps movement to its bounds.
 - Draws test labels in the same coordinate system.
 
 This separation keeps the small vertical slice simple. The connection between screens is currently represented by one string path in the menu handler.
 
-## Map Scaling
+## Map Camera
 
-The map uses a `1280 x 1500` reference area. For the current `Control` size, the smaller of the width and height scale factors is selected. This keeps the image uncropped, undistorted, and centered. The same transform is applied to labels, keeping their coordinates attached to the image.
+The map uses a `1280 x 1500` world-space reference area. The initial uniform camera zoom fills the viewport while preserving the SVG aspect ratio. Camera position is clamped after movement, zoom, and viewport resize; an axis remains centered when its visible world area is larger than the map extent.
+
+## Metro Map Data
+
+`core/metro_map/metro_map_data.gd` is the authoritative static catalog for lines, line-specific station nodes, and direct connections. Each undirected connection is declared once as `{stations, cost}`. Cost `1` joins neighboring Circle Line stations, while cost `0` joins direct transfer nodes on different lines.
+
+`core/metro_map/metro_graph.gd` provides order-independent direct-cost lookup. `core/metro_map/metro_map_validator.gd` checks record structure, references, duplicate pairs, transfer semantics, and the closed 12-station Circle Line topology without loading the map scene.
 
 ## Runtime Boundary
 
-The client reads its menu scene, local background, map scene, and local SVG map from `apps/client/`. The two visible labels are defined directly in `STATION_LABELS`. The server starts independently with:
+The client reads its menu scene, local background, map scene, and local SVG map from `apps/client/`. Shared metro map data and deterministic validation live under `core/metro_map/`. The server starts independently with:
 
 ```bash
 godot --headless --path . apps/server/server_main.tscn
 ```
 
-No gameplay state is shared between the components yet. Future shared runtime data and deterministic rules belong in `core/`.
+No mutable gameplay state is shared between the components yet. Station selection, squad movement, mouse dragging, and touch input are not implemented.
