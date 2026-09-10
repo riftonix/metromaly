@@ -59,3 +59,50 @@ static func _rejected(reason: String) -> Dictionary:
 		"success": false,
 		"reason": reason,
 	}
+
+
+static func list_destinations(
+	squads: Dictionary,
+	closed_for_entry_station_ids: Array[String],
+	squad_id: String,
+	stations: Dictionary,
+	connections: Array,
+) -> Array[Dictionary]:
+	var destinations: Array[Dictionary] = []
+	if not squads.has(squad_id) or squads[squad_id] is not Dictionary:
+		return destinations
+
+	var squad: Dictionary = squads[squad_id]
+	var origin_station_id: Variant = squad.get("station_id")
+	var action_points: Variant = squad.get("action_points")
+
+	for connection: Variant in connections:
+		if connection is not Dictionary:
+			continue
+		var station_ids: Variant = connection.get("stations")
+		if station_ids is not Array or station_ids.size() != 2:
+			continue
+
+		var destination_station_id: Variant = null
+		if station_ids[0] == origin_station_id:
+			destination_station_id = station_ids[1]
+		elif station_ids[1] == origin_station_id:
+			destination_station_id = station_ids[0]
+		else:
+			continue
+
+		if not stations.has(destination_station_id):
+			continue
+		if destination_station_id in closed_for_entry_station_ids:
+			continue
+
+		var cost: Variant = connection.get("cost")
+		if action_points is not int or action_points < cost:
+			continue
+
+		destinations.append({
+			"station_id": destination_station_id,
+			"cost": cost,
+		})
+
+	return destinations
