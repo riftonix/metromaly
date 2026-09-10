@@ -5,19 +5,35 @@ const BACKGROUND_COLOR := Color("#e1b27b")
 const TEXT_COLOR := Color.BLACK
 const REFERENCE_SIZE := Vector2(1280.0, 1500.0)
 const MAP_TEXTURE: Texture2D = preload("res://apps/client/assets/metro_map/metro_map.svg")
+const MapData = preload("res://core/metro_map/metro_map_data.gd")
+const MovementController = preload("res://core/squad_movement/squad_movement_controller.gd")
+const MapSessionState = preload("res://core/metro_map/metro_map_session_state.gd")
+const SquadState = preload("res://core/squad/squad_state.gd")
+const SquadMarkerScene = preload("res://apps/client/squad/squad_marker.tscn")
+const StationTargetScene = preload("res://apps/client/metro_map/station_target.gd")
+const TurnController = preload("res://core/squad_movement/squad_turn_controller.gd")
 const STATION_LABELS := [
 	{"title": "VDNH", "position": Vector2(842.0, 260.0)},
 	{"title": "Alexeevskaya", "position": Vector2(842.0, 286.0)},
 ]
 
 @onready var camera: Camera2D = $"../Camera2D"
+@onready var end_turn_button: Control = $"../HUD/EndTurnMargin/EndTurnButton"
 @export var camera_move_speed := 500.0
+
+var map_session_state: RefCounted
+var squad_state: RefCounted
+var selected_squad_id := ""
+var squad_markers: Dictionary = {}
+var station_targets: Dictionary = {}
 
 
 func _ready() -> void:
 	RenderingServer.set_default_clear_color(BACKGROUND_COLOR)
 	get_viewport().size_changed.connect(_on_viewport_size_changed)
 	fill_viewport()
+	_initialize_gameplay()
+	end_turn_button.pressed.connect(_on_end_turn_pressed)
 
 
 
@@ -43,6 +59,68 @@ func fill_viewport() -> void:
 
 func _on_viewport_size_changed() -> void:
 	fill_viewport()
+
+
+func _initialize_gameplay() -> void:
+	map_session_state = MapSessionState.new()
+	squad_state = SquadState.create_initial()
+	_create_station_targets()
+	_create_squad_markers()
+
+
+func _create_station_targets() -> void:
+	for station_id: String in MapData.STATIONS:
+		var target := StationTargetScene.new()
+		target.setup(station_id, MapData.STATIONS[station_id]["position"])
+		target.activated.connect(_on_station_activated)
+		add_child(target)
+		station_targets[station_id] = target
+
+
+func _create_squad_markers() -> void:
+	for squad_id: String in squad_state.squads:
+		var marker := SquadMarkerScene.instantiate()
+		marker.setup(squad_id, _squad_position(squad_id))
+		marker.activated.connect(_on_squad_activated)
+		add_child(marker)
+		squad_markers[squad_id] = marker
+
+
+func _on_squad_activated(squad_id: String) -> void:
+	if not squad_state.squads.has(squad_id):
+		return
+	selected_squad_id = squad_id
+	for marker_id: String in squad_markers:
+		squad_markers[marker_id].selected = marker_id == selected_squad_id
+
+
+func _on_station_activated(station_id: String) -> void:
+	if selected_squad_id.is_empty():
+		return
+	var result := MovementController.try_move(
+		squad_state.squads,
+		map_session_state.closed_for_entry_station_ids,
+		selected_squad_id,
+		station_id,
+		MapData.STATIONS,
+		MapData.CONNECTIONS,
+	)
+	if result["success"]:
+		_sync_squad_marker(selected_squad_id)
+
+
+func _on_end_turn_pressed() -> void:
+	TurnController.end_turn(squad_state.squads)
+
+
+func _sync_squad_marker(squad_id: String) -> void:
+	if squad_markers.has(squad_id) and squad_state.squads.has(squad_id):
+		squad_markers[squad_id].position = _squad_position(squad_id)
+
+
+func _squad_position(squad_id: String) -> Vector2:
+	var station_id: String = squad_state.squads[squad_id]["station_id"]
+	return MapData.STATIONS[station_id]["position"]
 
 
 

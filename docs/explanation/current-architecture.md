@@ -1,6 +1,6 @@
 # Current Vertical Slice Architecture
 
-The repository is one Godot project divided into client and server components. The implemented client flow is a linear transition between two independent scenes, while the server currently provides only a headless entry point.
+The repository is one Godot project divided into client and server components. The implemented client flow moves from the main menu into an interactive metro map, while the server currently provides only a headless entry point.
 
 ## Repository Boundaries
 
@@ -25,12 +25,13 @@ The main menu is responsible only for application entry:
 - Handles input through standard `Button` nodes.
 - Changes the scene or terminates the process.
 
-The map screen owns presentation and desktop camera navigation:
+The map screen owns presentation, interaction orchestration, and desktop camera navigation:
 
-- Draws the SVG and test labels in map-space coordinates under `MapWorld`.
+- Draws the SVG, station hit targets, squad markers, and test labels in map-space coordinates under `MapWorld`.
 - Uses `Camera2D` for arrow-key movement and mouse-wheel zoom.
 - Frames the map initially and clamps movement to its bounds.
-- Draws test labels in the same coordinate system.
+- Selects squads by stable ID and delegates destination requests to the core movement controller.
+- Keeps the `End Turn` control in a screen-space `CanvasLayer`, outside camera transforms.
 
 This separation keeps the small vertical slice simple. The connection between screens is currently represented by one string path in the menu handler.
 
@@ -44,12 +45,24 @@ The map uses a `1280 x 1500` world-space reference area. The initial uniform cam
 
 `core/metro_map/metro_graph.gd` provides order-independent direct-cost lookup. `core/metro_map/metro_map_validator.gd` checks record structure, references, duplicate pairs, transfer semantics, and the closed 12-station Circle Line topology without loading the map scene.
 
+## Squad Movement
+
+`core/squad/squad_state.gd` owns the mutable squad collection. Squads are stored in a dictionary keyed by stable squad ID; each squad has a current `station_id` and either zero or one `action_points`. The initial session renders one squad at `park_kultury_koltsevaya`, while movement and turn reset operate on the complete collection and support additional independent squads. Squad validation is isolated in `core/squad/squad_validator.gd`.
+
+`core/metro_map/metro_map_session_state.gd` owns `closed_for_entry_station_ids` as mutable map state separate from static topology. A listed station rejects incoming movement but does not prevent a squad already there from leaving. Removing the station ID restores entry. Closure validation remains under the map boundary in `core/metro_map/metro_map_session_validator.gd`.
+
+`SquadMovementController` checks the requested destination, direct connection, closure state, and connection cost before changing any squad data. A successful paid move consumes one action point, while a zero-cost transfer preserves it. A rejected move changes neither the station nor action points. `SquadTurnController` restores every squad to exactly one action point.
+
+The map creates one `StationTarget` for every station catalog entry and positions it from `MetroMapData.STATIONS`. Squad markers are reusable entity scenes under `apps/client/squad/` and are placed at the authoritative station position by the map. Activating an overlapping squad marker selects the squad without also activating the station beneath it. After a successful destination activation, the map refreshes the marker from squad state.
+
+The icon-only `End Turn` control is anchored to the lower-right viewport corner. It is not transformed by map movement or zoom.
+
 ## Runtime Boundary
 
-The client reads its menu scene, local background, map scene, and local SVG map from `apps/client/`. Shared metro map data and deterministic validation live under `core/metro_map/`. The server starts independently with:
+The client reads its menu scene, local background, map scene, and local SVG map from `apps/client/`. Shared metro map data and deterministic gameplay rules live under `core/`. The server starts independently with:
 
 ```bash
 godot --headless --path . apps/server/server_main.tscn
 ```
 
-No mutable gameplay state is shared between the components yet. Station selection, squad movement, mouse dragging, and touch input are not implemented.
+Squad state currently belongs to the local map session and is not shared with the server or persisted. Mouse dragging and touch input are not implemented.

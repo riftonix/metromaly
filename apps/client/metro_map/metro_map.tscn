@@ -1,6 +1,7 @@
-[gd_scene format=3 uid="uid://c3m6qebthe7f"]
+[gd_scene load_steps=3 format=3 uid="uid://c3m6qebthe7f"]
 
 [ext_resource type="Script" uid="uid://uty4ah1wy2j7" path="res://apps/client/metro_map/metro_map.gd" id="1"]
+[ext_resource type="PackedScene" path="res://apps/client/metro_map/end_turn_button.tscn" id="2"]
 
 [node name="MetroMap" type="Node2D" unique_id=1610714227]
 
@@ -8,3 +9,22 @@
 script = ExtResource("1")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=842528626]
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="EndTurnMargin" type="MarginContainer" parent="HUD"]
+anchors_preset = 8
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -172.0
+offset_top = -88.0
+offset_right = -24.0
+offset_bottom = -24.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="EndTurnButton" parent="HUD/EndTurnMargin" instance=ExtResource("2")]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2

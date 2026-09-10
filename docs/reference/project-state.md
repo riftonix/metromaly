@@ -13,16 +13,22 @@ Metromaly is currently an early interface vertical slice.
 - Two test station labels: `VDNH` and `Alexeevskaya`.
 - Runtime data for the 12 Circle Line station nodes and their direct transfer nodes.
 - Undirected direct-connection lookup and automated structural and topology validation.
+- Map-space hit targets generated for every station in the runtime catalog.
+- One initially rendered squad backed by a collection that supports multiple independent squads.
+- Squad selection and atomic direct movement with zero-or-one connection costs.
+- Destination-based station closures that block entry while allowing exit.
+- A lower-right screen-space `End Turn` control that restores every squad to one action point.
+- Focused headless tests for squad state, movement rules, map interaction, and turn reset.
 - A single `make verify` command for committed-data validation and focused tests.
 - A minimal headless server entry point.
 
 ## Not Implemented
 
-- Gameplay loop and map interaction.
-- Station selection and state.
-- Squad movement, station interaction, and turn handling.
+- Broader gameplay beyond squad movement and turn reset.
+- Station ownership, construction, combat, and dynamic closure controls.
+- Multi-edge pathfinding, movement animation, and squad creation UI.
 - Settings, saved games, and game continuation.
 - Returning from the map to the main menu.
 - Final visual design for the menu and map.
 
-The client and server currently share one Godot project. Networking, sessions, persistence, and shared gameplay rules have not been implemented.
+The client and server currently share one Godot project. Networking, server-owned sessions, and persistence have not been implemented; current squad gameplay rules are shared under `core/`, while mutable session state remains local to the map scene.

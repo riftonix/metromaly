@@ -19,8 +19,13 @@ Unique interface element names:
 
 | Path | Purpose |
 | --- | --- |
-| `apps/client/metro_map/metro_map.tscn` | Map world and camera scene. |
-| `apps/client/metro_map/metro_map.gd` | Draws the background, map, and test labels and controls the camera. |
+| `apps/client/metro_map/metro_map.tscn` | Interactive map world, camera, and lower-right screen-space HUD. |
+| `apps/client/metro_map/metro_map.gd` | Draws the map, controls the camera, creates interaction nodes, and coordinates squad selection and movement. |
+| `apps/client/metro_map/station_target.gd` | Map-space station hit target that publishes a stable station ID. |
+| `apps/client/squad/squad_marker.tscn` | Reusable map-space squad marker scene. |
+| `apps/client/squad/squad_marker.gd` | Squad marker identity, selection state, input, and drawing. |
+| `apps/client/metro_map/end_turn_button.tscn` | Reusable icon-only end-turn control scene. |
+| `apps/client/metro_map/end_turn_button.gd` | End-turn icon drawing and pointer interaction states. |
 | `apps/client/assets/metro_map/metro_map.svg` | Map texture with a `1280 x 1500` coordinate system. |
 
 Key `metro_map.gd` constants:
@@ -43,11 +48,30 @@ Key `metro_map.gd` constants:
 | `core/metro_map/validate_metro_map.gd` | Headless committed-data validation entry point. |
 | `tests/core/metro_map/metro_map_test.gd` | Self-contained lookup and invalid-fixture tests. |
 
+## Squad Movement
+
+| Path | Purpose |
+| --- | --- |
+| `core/squad/squad_state.gd` | Mutable squad collection and initial squad state. |
+| `core/squad/squad_validator.gd` | Squad structure, station-reference, and action-point validation. |
+| `core/metro_map/metro_map_session_state.gd` | Mutable destination-closure map state. |
+| `core/metro_map/metro_map_session_validator.gd` | Known and unique closure-station validation. |
+| `core/squad_movement/squad_movement_controller.gd` | Atomic direct movement, connection cost, and entry-closure rules. |
+| `core/squad_movement/squad_turn_controller.gd` | All-squad action-point reset. |
+| `tests/core/squad/squad_test.gd` | Focused squad state and validation tests. |
+| `tests/core/metro_map/metro_map_session_test.gd` | Focused map closure state and validation tests. |
+| `tests/core/squad_movement/squad_movement_test.gd` | Focused movement, closure interaction, and turn tests. |
+| `tests/apps/client/metro_map/metro_map_interaction_test.gd` | Headless map-scene interaction and screen-space HUD tests. |
+
+The initial session contains one rendered squad at `park_kultury_koltsevaya` with one action point. The dictionary-based model and turn controller operate on any number of squads.
+
 Run all validation and focused tests with:
 
 ```bash
 make verify
 ```
+
+The command validates committed metro data, runs the metro graph tests, runs squad rule tests, and loads the interactive map scene through its focused headless test.
 
 ## Project Materials
 
