@@ -23,13 +23,16 @@ The metro map is a `Node2D` world viewed through `Camera2D`. `MetroMapData` prov
 
 ### Architecture Overview
 
-The map scene owns interaction presentation and delegates movement decisions to a gameplay controller. Station hit targets and squad markers live in the camera-transformed map world. Fixed HUD controls live in a `CanvasLayer` or equivalent screen-space UI. The controller reads immutable station and connection data while owning mutable squads, selection, closure state, and turn transitions.
+The map scene owns interaction presentation and delegates movement decisions to a gameplay controller. Station hit targets and squad markers live in the camera-transformed map world. Fixed HUD controls live in a `CanvasLayer` or equivalent screen-space UI. Squad state belongs to the squad domain, closure state belongs to the metro map session, and movement controllers coordinate these inputs without owning them.
 
 ### Component Responsibilities
 
 - Station hit targets publish station IDs when activated.
 - Squad markers publish squad IDs when activated and render at the associated station position.
-- The movement controller owns the squad collection, selected squad ID, `closed_for_entry_station_ids`, movement checks, and successful state changes.
+- The squad domain owns the squad collection and squad-record validation.
+- The metro map session owns `closed_for_entry_station_ids` and closure validation.
+- The map scene owns the selected squad ID and passes squad and map state into movement checks.
+- The movement controller performs movement checks and successful squad state changes without owning either input state.
 - The turn controller resets action points across the complete squad collection.
 - `MetroGraph` reports direct connection cost without owning gameplay state.
 
@@ -43,9 +46,15 @@ The SVG remains presentation-only and is not used for hit testing. Station inter
 
 Create station hit areas from the station catalog and one initial squad marker from initial squad state. Route marker activation to the gameplay controller. Add a fixed `End Turn` button outside `MapWorld` so camera movement and zoom do not transform it.
 
-### Squad State
+### Squad Domain
 
 Store squads in a dictionary keyed by stable squad ID. Each record contains `station_id` and `action_points`. Keep the selected squad as an ID rather than a direct node reference so presentation nodes can be rebuilt without invalidating gameplay state.
+
+Keep the reusable client squad marker under `apps/client/squad/`. The map positions and coordinates the marker but does not own its presentation implementation.
+
+### Metro Map Session State
+
+Store `closed_for_entry_station_ids` under `core/metro_map/` because closures describe mutable map availability rather than squad identity.
 
 ### Movement Controller
 
@@ -66,7 +75,7 @@ Iterate over every squad record and assign one action point. This intentionally 
 
 ### Ownership and Lifecycle
 
-Squad and closure state is mutable gameplay state owned by the map session. `MetroMapData` remains immutable topology. Persistence is deferred.
+Squad and closure state are separate mutable inputs coordinated by the local map session. `MetroMapData` remains immutable topology. Persistence is deferred.
 
 ## Interfaces
 
