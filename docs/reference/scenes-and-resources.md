@@ -20,12 +20,13 @@ Unique interface element names:
 | Path | Purpose |
 | --- | --- |
 | `apps/client/metro_map/metro_map.tscn` | Interactive map world, camera, and lower-right screen-space HUD. |
-| `apps/client/metro_map/metro_map.gd` | Draws the map, controls the camera, creates interaction nodes, and coordinates squad selection and movement. |
-| `apps/client/metro_map/station_target.gd` | Map-space station hit target that publishes a stable station ID. |
+| `apps/client/metro_map/metro_map.gd` | Draws the map, controls the camera, derives destination guidance, creates interaction nodes, and coordinates squad selection and movement. |
+| `apps/client/metro_map/station_target.gd` | Reusable map-space station target with neutral, free-destination, and paid-destination presentation states. |
 | `apps/client/squad/squad_marker.tscn` | Reusable map-space squad marker scene. |
-| `apps/client/squad/squad_marker.gd` | Squad marker identity, selection state, input, and drawing. |
+| `apps/client/squad/squad_marker.gd` | Shield-shaped squad marker with selection, availability, and zero-or-one action-point presentation. |
 | `apps/client/metro_map/end_turn_button.tscn` | Reusable icon-only end-turn control scene. |
-| `apps/client/metro_map/end_turn_button.gd` | End-turn icon drawing and pointer interaction states. |
+| `apps/client/metro_map/end_turn_button.gd` | Circular-arrow end-turn icon with pointer, focus, keyboard/controller, and disabled states. |
+| `apps/client/metro_map/drag_state.gd` | Shared pointer-drag state used to suppress station or squad activation after camera dragging. |
 | `apps/client/assets/metro_map/metro_map.svg` | Map texture with a `1280 x 1500` coordinate system. |
 
 Key `metro_map.gd` constants:
@@ -64,6 +65,12 @@ Key `metro_map.gd` constants:
 | `tests/apps/client/metro_map/metro_map_interaction_test.gd` | Headless map-scene interaction and screen-space HUD tests. |
 
 The initial session contains one rendered squad at `park_kultury_koltsevaya` with one action point. The dictionary-based model and turn controller operate on any number of squads.
+
+Squad markers use four presentation states: `unselected-mobile`, `selected-mobile`, `unselected-spent`, and `selected-spent`. The marker shows one action point as a filled indicator and zero action points as a hollow indicator. Selection remains available after the action point is spent.
+
+Selecting a squad derives `destination_guidance` from `SquadMovementController.list_destinations()`. A free destination uses a rotating green gear outline, a paid destination uses a rotating dashed outline, and all unavailable stations remain neutral. Guidance is recomputed after selection, successful movement, closure changes, and turn end.
+
+The lower-right icon-only `End Turn` control displays a circular arrow. It has distinct default, hover, pressed, keyboard-focus, and disabled states, exposes the `End Turn` tooltip, and accepts mouse, keyboard, and controller activation while enabled.
 
 Run all validation and focused tests with:
 

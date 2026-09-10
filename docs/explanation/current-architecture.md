@@ -28,7 +28,7 @@ The main menu is responsible only for application entry:
 The map screen owns presentation, interaction orchestration, and desktop camera navigation:
 
 - Draws the SVG, station hit targets, squad markers, and test labels in map-space coordinates under `MapWorld`.
-- Uses `Camera2D` for arrow-key movement and mouse-wheel zoom.
+- Uses `Camera2D` for arrow-key movement, left-button pointer dragging, and mouse-wheel zoom.
 - Frames the map initially and clamps movement to its bounds.
 - Selects squads by stable ID and delegates destination requests to the core movement controller.
 - Keeps the `End Turn` control in a screen-space `CanvasLayer`, outside camera transforms.
@@ -51,11 +51,15 @@ The map uses a `1280 x 1500` world-space reference area. The initial uniform cam
 
 `core/metro_map/metro_map_session_state.gd` owns `closed_for_entry_station_ids` as mutable map state separate from static topology. A listed station rejects incoming movement but does not prevent a squad already there from leaving. Removing the station ID restores entry. Closure validation remains under the map boundary in `core/metro_map/metro_map_session_validator.gd`.
 
-`SquadMovementController` checks the requested destination, direct connection, closure state, and connection cost before changing any squad data. A successful paid move consumes one action point, while a zero-cost transfer preserves it. A rejected move changes neither the station nor action points. `SquadTurnController` restores every squad to exactly one action point.
+`SquadMovementController` checks the requested destination, direct connection, closure state, and connection cost before changing any squad data. Its non-mutating `list_destinations()` query derives every currently legal direct destination and its cost from the same rules. A successful paid move consumes one action point, while a zero-cost transfer preserves it. A rejected move changes neither the station nor action points. `SquadTurnController` restores every squad to exactly one action point.
 
-The map creates one `StationTarget` for every station catalog entry and positions it from `MetroMapData.STATIONS`. Squad markers are reusable entity scenes under `apps/client/squad/` and are placed at the authoritative station position by the map. Activating an overlapping squad marker selects the squad without also activating the station beneath it. After a successful destination activation, the map refreshes the marker from squad state.
+The map creates one `StationTarget` for every station catalog entry and positions it from `MetroMapData.STATIONS`. Selecting a squad refreshes `destination_guidance` from the core query and applies neutral, free-destination, or paid-destination presentation to each target. The map recomputes this guidance after successful movement, closure changes, and turn end so stale destinations do not remain highlighted.
 
-The icon-only `End Turn` control is anchored to the lower-right viewport corner. It is not transformed by map movement or zoom.
+Squad markers are reusable entity scenes under `apps/client/squad/` and are placed at the authoritative station position by the map. Their shield silhouette distinguishes them from station targets. Four presentation states combine selected or unselected state with mobile or spent state, and the marker directly displays whether zero or one action point remains. Marker position and action-point presentation are refreshed from squad state after movement and turn end.
+
+The icon-only `End Turn` control is anchored to the lower-right viewport corner and is not transformed by map movement or zoom. Its circular-arrow presentation supports default, hover, pressed, keyboard-focus, and disabled states, and it exposes an `End Turn` tooltip.
+
+Pointer input distinguishes clicks from camera dragging with an eight-pixel threshold. Squad and station activation occurs on button release and is suppressed after a drag, so the player can start dragging from map features without accidentally selecting or moving a squad.
 
 ## Runtime Boundary
 
@@ -65,4 +69,4 @@ The client reads its menu scene, local background, map scene, and local SVG map 
 godot --headless --path . apps/server/server_main.tscn
 ```
 
-Squad state currently belongs to the local map session and is not shared with the server or persisted. Mouse dragging and touch input are not implemented.
+Squad state currently belongs to the local map session and is not shared with the server or persisted. Touch input is not implemented.

@@ -12,6 +12,7 @@ const SquadState = preload("res://core/squad/squad_state.gd")
 const SquadMarkerScene = preload("res://apps/client/squad/squad_marker.tscn")
 const StationTargetScene = preload("res://apps/client/metro_map/station_target.gd")
 const TurnController = preload("res://core/squad_movement/squad_turn_controller.gd")
+const DragState = preload("res://apps/client/metro_map/drag_state.gd")
 const STATION_LABELS := [
 	{"title": "VDNH", "position": Vector2(842.0, 260.0)},
 	{"title": "Alexeevskaya", "position": Vector2(842.0, 286.0)},
@@ -26,6 +27,13 @@ var squad_state: RefCounted
 var selected_squad_id := ""
 var squad_markers: Dictionary = {}
 var station_targets: Dictionary = {}
+var destination_guidance: Dictionary = {}
+
+const DRAG_THRESHOLD := 8.0
+var _left_button_pressed := false
+var _left_button_start_position := Vector2.ZERO
+var _left_button_dragging := false
+var _left_button_last_position := Vector2.ZERO
 
 
 func _ready() -> void:
@@ -34,7 +42,9 @@ func _ready() -> void:
 	fill_viewport()
 	_initialize_gameplay()
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
-
+	# Share drag state with clickable entities so they can suppress
+	# activation after a camera drag.
+	DragState.map_world = self
 
 
 @export var zoom_step := 0.1
@@ -92,6 +102,7 @@ func _on_squad_activated(squad_id: String) -> void:
 	selected_squad_id = squad_id
 	for marker_id: String in squad_markers:
 		squad_markers[marker_id].selected = marker_id == selected_squad_id
+	_refresh_destination_guidance()
 
 
 func _on_station_activated(station_id: String) -> void:
@@ -107,15 +118,53 @@ func _on_station_activated(station_id: String) -> void:
 	)
 	if result["success"]:
 		_sync_squad_marker(selected_squad_id)
+		_refresh_destination_guidance()
 
 
 func _on_end_turn_pressed() -> void:
 	TurnController.end_turn(squad_state.squads)
+	_sync_all_squad_marker_action_points()
+	_refresh_destination_guidance()
+
+
+func _refresh_destination_guidance() -> void:
+	destination_guidance.clear()
+	if not selected_squad_id.is_empty() and squad_state.squads.has(selected_squad_id):
+		for destination: Dictionary in MovementController.list_destinations(
+			squad_state.squads,
+			map_session_state.closed_for_entry_station_ids,
+			selected_squad_id,
+			MapData.STATIONS,
+			MapData.CONNECTIONS,
+		):
+			destination_guidance[destination["station_id"]] = destination["cost"]
+	_apply_destination_guidance()
+
+
+func _apply_destination_guidance() -> void:
+	for station_id: String in station_targets:
+		var target: Area2D = station_targets[station_id]
+		target.set_destination_cost(destination_guidance.get(station_id))
+
+
+func notify_closures_changed() -> void:
+	_refresh_destination_guidance()
 
 
 func _sync_squad_marker(squad_id: String) -> void:
 	if squad_markers.has(squad_id) and squad_state.squads.has(squad_id):
 		squad_markers[squad_id].position = _squad_position(squad_id)
+		_sync_squad_marker_action_points(squad_id)
+
+
+func _sync_squad_marker_action_points(squad_id: String) -> void:
+	squad_markers[squad_id].action_points = int(squad_state.squads[squad_id]["action_points"])
+
+
+func _sync_all_squad_marker_action_points() -> void:
+	for squad_id: String in squad_markers:
+		if squad_state.squads.has(squad_id):
+			_sync_squad_marker_action_points(squad_id)
 
 
 func _squad_position(squad_id: String) -> Vector2:
@@ -177,10 +226,34 @@ func _draw() -> void:
 		)
 
 
+func _input(event: InputEvent) -> void:
+	# Use _input (not _unhandled_input) so drag state is updated before
+	# Area2D _input_event handlers see a release event.
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			if event.pressed:
+				_left_button_pressed = true
+				_left_button_dragging = false
+				_left_button_start_position = event.position
+				_left_button_last_position = event.position
+			else:
+				_left_button_pressed = false
+				_left_button_dragging = false
+
+	if event is InputEventMouseMotion and _left_button_pressed:
+		if not _left_button_dragging:
+			if event.position.distance_to(_left_button_start_position) >= DRAG_THRESHOLD:
+				_left_button_dragging = true
+		if _left_button_dragging:
+			var delta: Vector2 = (event.position - _left_button_last_position) / camera.zoom.x
+			camera.position -= delta
+			clamp_camera_position()
+		_left_button_last_position = event.position
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event is not InputEventMouseButton:
 		return
-
 	if not event.pressed:
 		return
 
@@ -188,6 +261,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		change_zoom(1.0)
 	elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 		change_zoom(-1.0)
+
+
+func is_left_button_dragging() -> bool:
+	return _left_button_dragging
 
 
 func change_zoom(direction: float) -> void:

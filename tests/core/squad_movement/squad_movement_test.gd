@@ -25,6 +25,13 @@ func _initialize() -> void:
 	_test_reopened_station()
 	_test_end_turn_with_one_squad()
 	_test_end_turn_with_multiple_squads()
+	_test_list_destinations_paid_and_free()
+	_test_list_destinations_unaffordable()
+	_test_list_destinations_free_remains_at_zero_points()
+	_test_list_destinations_excludes_closed()
+	_test_list_destinations_excludes_unrelated_and_unknown()
+	_test_list_destinations_unknown_squad()
+	_test_list_destinations_is_non_mutating()
 
 	if _failures.is_empty():
 		print("Squad movement tests passed (%d tests)" % _tests_run)
@@ -178,6 +185,108 @@ func _test_end_turn_with_multiple_squads() -> void:
 			1,
 			"end turn sets squad '%s' to exactly one action point" % squad_id,
 		)
+
+
+func _list_destinations(state: RefCounted, map_state: RefCounted) -> Array[Dictionary]:
+	return MovementController.list_destinations(
+		state.squads,
+		map_state.closed_for_entry_station_ids,
+		SquadState.INITIAL_SQUAD_ID,
+		MapData.STATIONS,
+		MapData.CONNECTIONS,
+	)
+
+
+func _destination_ids(destinations: Array[Dictionary]) -> Array[String]:
+	var ids: Array[String] = []
+	for destination: Dictionary in destinations:
+		ids.append(destination["station_id"])
+	return ids
+
+
+func _destination_cost(destinations: Array[Dictionary], station_id: String) -> Variant:
+	for destination: Dictionary in destinations:
+		if destination["station_id"] == station_id:
+			return destination["cost"]
+	return null
+
+
+func _test_list_destinations_paid_and_free() -> void:
+	var state := SquadState.create_initial()
+	var destinations := _list_destinations(state, MapSessionState.new())
+	_expect_equal(destinations.size(), 3, "initial squad sees three direct destinations")
+	_expect_equal(
+		_destination_cost(destinations, "oktyabrskaya_koltsevaya"),
+		1,
+		"paid destination reports cost one",
+	)
+	_expect_equal(
+		_destination_cost(destinations, "park_kultury_sokolnicheskaya"),
+		0,
+		"free destination reports cost zero",
+	)
+	_expect_equal(
+		_destination_cost(destinations, "kievskaya_koltsevaya"),
+		1,
+		"reverse paid destination reports cost one",
+	)
+
+
+func _test_list_destinations_unaffordable() -> void:
+	var state := _state_at(SquadState.INITIAL_STATION_ID, 0)
+	var destinations := _list_destinations(state, MapSessionState.new())
+	var ids := _destination_ids(destinations)
+	_expect_equal(destinations.size(), 1, "zero-action-point squad only reaches the free destination")
+	_expect("oktyabrskaya_koltsevaya" not in ids, "unaffordable paid destination is excluded")
+	_expect("kievskaya_koltsevaya" not in ids, "unaffordable reverse paid destination is excluded")
+
+
+func _test_list_destinations_free_remains_at_zero_points() -> void:
+	var state := _state_at(SquadState.INITIAL_STATION_ID, 0)
+	var destinations := _list_destinations(state, MapSessionState.new())
+	_expect_equal(
+		_destination_cost(destinations, "park_kultury_sokolnicheskaya"),
+		0,
+		"free destination remains available at zero action points",
+	)
+
+
+func _test_list_destinations_excludes_closed() -> void:
+	var state := SquadState.create_initial()
+	var map_state := MapSessionState.new(["oktyabrskaya_koltsevaya", "park_kultury_sokolnicheskaya"])
+	var destinations := _list_destinations(state, map_state)
+	var ids := _destination_ids(destinations)
+	_expect("oktyabrskaya_koltsevaya" not in ids, "closed paid destination is excluded")
+	_expect("park_kultury_sokolnicheskaya" not in ids, "closed free destination is excluded")
+	_expect_equal(destinations.size(), 1, "only the open paid destination remains")
+
+
+func _test_list_destinations_excludes_unrelated_and_unknown() -> void:
+	var state := SquadState.create_initial()
+	var destinations := _list_destinations(state, MapSessionState.new())
+	var ids := _destination_ids(destinations)
+	_expect("kurskaya_koltsevaya" not in ids, "unrelated station is excluded")
+	_expect("missing_station" not in ids, "unknown station is excluded")
+	_expect(SquadState.INITIAL_STATION_ID not in ids, "current station is excluded")
+
+
+func _test_list_destinations_unknown_squad() -> void:
+	var state := SquadState.create_initial()
+	var destinations := MovementController.list_destinations(
+		state.squads,
+		MapSessionState.new().closed_for_entry_station_ids,
+		"missing_squad",
+		MapData.STATIONS,
+		MapData.CONNECTIONS,
+	)
+	_expect_equal(destinations.size(), 0, "unknown squad yields an empty destination list")
+
+
+func _test_list_destinations_is_non_mutating() -> void:
+	var state := SquadState.create_initial()
+	var before: Dictionary = state.squads.duplicate(true)
+	_list_destinations(state, MapSessionState.new())
+	_expect_equal(state.squads, before, "destination query does not mutate squad state")
 
 
 func _state_at(station_id: String, action_points: int) -> RefCounted:

@@ -60,11 +60,11 @@ Selecting a squad SHALL highlight every directly connected destination that the 
 - **THEN** the destination is not presented as available
 
 ### Requirement: Icon-only end-turn control
-The screen-space end-turn control SHALL use a circular arrow surrounding a small forward-pointing triangle and SHALL contain no visible text label. It SHALL provide an `End Turn` tooltip and visually distinct default, hover, pressed, keyboard-focus, and disabled states.
+The screen-space end-turn control SHALL use a circular arrow and SHALL contain no visible text label. It SHALL provide an `End Turn` tooltip and visually distinct default, hover, pressed, keyboard-focus, and disabled states.
 
 #### Scenario: Player identifies the end-turn control
 - **WHEN** the end-turn control is displayed
-- **THEN** it shows a circular arrow surrounding a small forward-pointing triangle without visible text
+- **THEN** it shows a circular arrow without visible text
 
 #### Scenario: Pointer hovers over the end-turn control
 - **WHEN** the pointer rests over the end-turn control

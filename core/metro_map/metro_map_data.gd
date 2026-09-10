@@ -305,4 +305,8 @@ const CONNECTIONS := [
 		"stations": ["kievskaya_koltsevaya", "kievskaya_filyovskaya"],
 		"cost": 0,
 	},
+	{
+		"stations": ["kievskaya_arbatsko_pokrovskaya", "kievskaya_filyovskaya"],
+		"cost": 0,
+	},
 ]
